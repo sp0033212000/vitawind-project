@@ -1,56 +1,159 @@
-import React, { useState } from 'react'
-import logo from './logo.svg'
-import poweredBy from './powered-by-vitawind-dark.png'
+import React, { useCallback } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import classNames from "classnames";
 
-function App() {
-  const [count, setCount] = useState(0)
+import { v4 as uuidV4 } from "uuid";
+
+import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Cell, EditableRow, Row } from "./components/feature/Table";
+import { isEmptyString, isNotSet } from "@utils/format.checker";
+
+/**
+ * @table key meaning
+ * 工作項目 task
+ * 預計完成時間 estimateAt
+ * 說明 description
+ * 實際完成時間 completedAt
+ * 差異分析 varianceAnalysis
+ */
+
+export const defaultProjectValues: Partial<Project> = {
+  task: "",
+  estimateAt: "",
+  description: "",
+  completedAt: "",
+  varianceAnalysis: "",
+};
+
+interface FormValues {
+  projectName: string;
+  data: Project[];
+}
+const App = () => {
+  const { control, register, reset, watch } = useForm<FormValues>({
+    defaultValues: { projectName: "none", data: [] },
+  });
+  const { append, fields, remove, insert } = useFieldArray({
+    control,
+    name: "data",
+  });
+
+  const watchProjectName = watch("projectName");
+
+  const createProject = useCallback(() => {
+    const projectName = prompt("請輸入專案名稱");
+    if (isNotSet(projectName) || isEmptyString(projectName)) return;
+
+    reset({ projectName, data: [] });
+  }, []);
+
+  const resetRow = useCallback((index: number, resetValue: Project) => {
+    remove(index);
+    insert(index, resetValue);
+  }, []);
 
   return (
-    <div className="text-center">
-      <header className="bg-[#282c34] min-h-screen text-white flex flex-col justify-center items-center">
-        <img src={logo} className="h-60 motion-safe:animate-spin animate-speed" alt="logo" />
-        <style>
-          {"\
-            .animate-speed{\
-              animation-duration:20s;\
-            }\
-          "}
-        </style>
-        <p className="text-3xl font-bold">Vite + React + TypeScript + Tailwind jit!</p>
-        <p className="mt-3">
+    <React.Fragment>
+      <main className={classNames("w-full", "p-6")}>
+        <div className={classNames("mb-4", "flex")}>
+          <div
+            className={classNames(
+              "w-56",
+              "border",
+              "rounded-xl",
+              "h-12",
+              "mr-4",
+              "px-4",
+              "py-2"
+            )}
+          >
+            <select
+              className={classNames("w-full", "h-full", "outline-none")}
+              {...register("projectName")}
+            >
+              <option value="none" disabled>
+                請選擇 Project
+              </option>
+            </select>
+          </div>
           <button
-            type="button"
-            className="rounded text-[#282C34] bg-gray-300 px-2 py-2 my-6 hover:bg-gray-200 transition-all active:scale-95"
-            onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
+            onClick={createProject}
+            className={classNames(
+              "bg-blue-400",
+              "h-12",
+              "w-24",
+              "rounded-xl",
+              "text-white",
+              "font-bold"
+            )}
+          >
+            Create
           </button>
-        </p>
-        <p>
-          Edit <code className="text-[#8d96a7]">App.tsx</code> and save to test HMR updates.
-        </p>
-        <p className="mt-3 flex gap-3 text-center text-[#8d96a7]">
-          <a
-            className="text-[#61dafb] hover:text-[#a4ebff] hover:underline transition-all"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className="text-[#61dafb] hover:text-[#a4ebff] hover:underline transition-all"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-        </p>
-        <img className="mx-auto my-8" alt="powered-by" src={poweredBy} />
-      </header>
-    </div>
-  )
-}
+        </div>
+        <h1 className={classNames("text-4xl", "mb-4", "underline")}>
+          {watchProjectName}
+        </h1>
+        <div
+          className={classNames(
+            "border",
+            "border-solid",
+            "border-blue-400",
+            "rounded-lg",
+            "overflow-scroll"
+          )}
+        >
+          <table className={classNames("table-auto", "w-full")}>
+            <thead
+              className={classNames(
+                "divide-blue-400",
+                "divide-y",
+                "bg-blue-400",
+                "text-white"
+              )}
+            >
+              <Row>
+                <Cell as={"th"}>
+                  <button
+                    className={classNames("text-2xl")}
+                    onClick={() =>
+                      append({
+                        id: uuidV4(),
+                        newTask: false,
+                        ...defaultProjectValues,
+                      })
+                    }
+                  >
+                    <FontAwesomeIcon icon={faPlusCircle} />
+                  </button>
+                </Cell>
+                <Cell as={"th"}>工作項目</Cell>
+                <Cell as={"th"}>預計完成時間</Cell>
+                <Cell as={"th"}>說明</Cell>
+                <Cell as={"th"}>實際完成時間</Cell>
+                <Cell as={"th"}>差異分析</Cell>
+              </Row>
+            </thead>
+            <tbody className={classNames("divide-blue-400", "divide-y")}>
+              {fields.map((field, index) => {
+                return (
+                  <EditableRow
+                    key={field.id}
+                    index={index}
+                    register={register}
+                    remove={remove}
+                    isNew={field.newTask}
+                    reset={resetRow}
+                    defaultValues={{ ...field, ...watch("data")?.[index] }}
+                  />
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </React.Fragment>
+  );
+};
 
-export default App
+export default App;

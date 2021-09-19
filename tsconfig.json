@@ -1,19 +1,64 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "allowJs": false,
-    "skipLibCheck": false,
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react"
-  },
-  "include": ["./src"]
+    "compilerOptions": {
+        "target": "ESNext",
+        "lib": [
+            "DOM",
+            "DOM.Iterable",
+            "ESNext"
+        ],
+        "allowJs": false,
+        "skipLibCheck": false,
+        "esModuleInterop": false,
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "module": "ESNext",
+        "moduleResolution": "Node",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "jsx": "react",
+        "baseUrl": ".",
+        "paths": {
+            "@api/*": [
+                "./src/api/*"
+            ],
+            "@assets/*": [
+                "./src/assets/*"
+            ],
+            "@components/*": [
+                "./src/components/*"
+            ],
+            "@hooks/*": [
+                "./src/hooks/*"
+            ],
+            "@static/*": [
+                "./src/static/*"
+            ],
+            "@styles/*": [
+                "./src/styles/*"
+            ],
+            "@types/*": [
+                "./src/types/*"
+            ],
+            "@utils/*": [
+                "./src/utils/*"
+            ],
+            "@images/*": [
+                "./src/assets/images/*"
+            ],
+            "@common/*": [
+                "./src/components/common/*"
+            ],
+            "@feature/*": [
+                "./src/components/feature/*"
+            ],
+            "@/*": [
+                "./src/*"
+            ]
+        }
+    },
+    "include": [
+        "./src"
+    ]
 }
